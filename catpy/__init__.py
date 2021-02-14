@@ -1,7 +1,8 @@
 #
 #
 from catpy.xl.read_xl import get_riser
-from catpy.units.units import Units
+from catpy.units.main import Units
+from catpy.catenary.buoycat import CatBuoy
 #
 
 #__all__ = "interface"

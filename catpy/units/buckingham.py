@@ -24,14 +24,17 @@ N/m^2  without conversion result is: g/(m*s^2)
 
 import re
 import math
+from typing import Dict, List, Tuple
 
 #
 #
-__all__ = ['Number', 'allunits', 'pm', 'exp', 'log', 'sin', 'cos']
+__all__ : List[str] = ['Number', 'allunits', 'pm', 'exp', 'log', 'sin', 'cos']
 
 class Fraction:
     @staticmethod
-    def gcd(x, y):
+    def gcd(x:int, y:int) -> int:
+        """
+        """
         g = y
         while x > 0:
             g = x
@@ -39,10 +42,13 @@ class Fraction:
             y = g
         return g
     #
-    def __init__(self,x,y='1'):
-        z=(str(x)+'/'+str(y)).split('/')[:2]
-        self.n,self.d = int(float(z[0])),int(float(z[1]))
-        if self.d<0:
+    def __init__(self, x:int, y:str ='1') -> None:
+        """
+        """
+        z = (str(x)+'/'+str(y)).split('/')[:2]
+        self.n, self.d = int(float(z[0])),int(float(z[1]))
+        
+        if self.d < 0:
             self.n,self.d = -self.n,-self.d
         m = self.n and self.gcd(abs(self.n),abs(self.d)) or 1
         self.n, self.d = self.n/m, self.d/m
@@ -161,29 +167,29 @@ UNITS = {
     'fermi':(10.0**-15,1,0,0,0,0,0),
 }
 #
-def extend_units(units):
-    scales =  [
-        ('yocto',10.0**-24),
-        ('zepto',10.0**-21),
-        ('atto',10.0**-18),
-        ('femto',10.0**-15),
-        ('pico',10.0**-12),
-        ('nano',10.0**-9),
-        ('micro',10.0**-6),
-        ('milli',10.0**-3),
-        ('centi',10.0**-2),
-        ('deci',0.1),
-        ('deca',10.0),
-        ('hecto',10.0**2),
-        ('kilo',10.0**3),
-        ('mega',10.0**6),
-        ('giga',10.0**9),
-        ('tera',10.0**12),
-        ('peta',10.0**15),
-        ('exa',10.0**18),
-        ('zetta',10.0**21),
-        ('votta',10.0**24),
-        ]
+def extend_units(units:Dict):
+    scales:List[tuple] =  [
+                ('yocto',10.0**-24),
+                ('zepto',10.0**-21),
+                ('atto',10.0**-18),
+                ('femto',10.0**-15),
+                ('pico',10.0**-12),
+                ('nano',10.0**-9),
+                ('micro',10.0**-6),
+                ('milli',10.0**-3),
+                ('centi',10.0**-2),
+                ('deci',0.1),
+                ('deca',10.0),
+                ('hecto',10.0**2),
+                ('kilo',10.0**3),
+                ('mega',10.0**6),
+                ('giga',10.0**9),
+                ('tera',10.0**12),
+                ('peta',10.0**15),
+                ('exa',10.0**18),
+                ('zetta',10.0**21),
+                ('votta',10.0**24),
+                ]
     keys = [key for key in units]
     for name, conversion in scales:
         for key in keys:
@@ -193,7 +199,9 @@ def extend_units(units):
 #
 extend_units(UNITS)
 #
-def buckingham(units,d):
+def buckingham(units:str, d:Dict):
+    """
+    """
     items = units.split('/')
     numerator = items[0].split('*')
     denominator = items[1:]
@@ -227,6 +235,44 @@ def int_safe(x):
     if x == i or x > 0: 
         return i
     return i-1
+#
+#
+def temperature_in(value:float, dims:str):
+    """
+    """
+    _value = float(value)
+    if re.match(r"\bfahrenheit\b", str(dims), re.IGNORECASE):
+        dims = dims.replace('fahrenheit', 'kelvin')
+        _value = (_value + 459.67) * 5/9
+    
+    elif re.match(r"\bcelsius\b", str(dims), re.IGNORECASE):
+        dims = dims.replace('celsius', 'kelvin')        
+        _value += 273.15
+    
+    elif re.match(r"\brankine\b", str(dims), re.IGNORECASE):
+        dims = dims.replace('rankine', 'kelvin')        
+        _value *= 5/9
+    
+    return _value, dims
+#
+def temperature_out(value:float, dims:str):
+    """
+    """
+    _value = value
+    if re.match(r"\bfahrenheit\b", str(dims), re.IGNORECASE):
+        dims = dims.replace('fahrenheit', 'kelvin')
+        _value = (_value * 9/5 - 459.67)
+    
+    elif re.match(r"\bcelsius\b", str(dims), re.IGNORECASE):
+        dims = dims.replace('celsius', 'kelvin')
+        _value -= 273.15
+    
+    elif re.match(r"\rankine\b", str(dims), re.IGNORECASE):
+        dims = dims.replace('rankine', 'kelvin')
+        _value *= 9/5
+    
+    return _value, dims
+#
 #
 class Number:
     """
@@ -315,16 +361,21 @@ class Number:
     c_k = dict((key,value[5]) for key,value in UNITS.items())
     c_r = dict((key,value[6]) for key,value in UNITS.items())
     #
-    def __init__(self,value,error = 0.0,dims = 'N'):
-        if not isinstance(error,(int,float)):
+    def __init__(self, value:float, error:float = 0.0, dims:str = 'N'):
+        """
+        """
+        if not isinstance(error,(int, float)):
             raise Exception("second argument must be the error")
         
-        if isinstance(dims,tuple):
+        if isinstance(dims, tuple):
             dims = 'N*L^{:}*T^{:}*M^{:}*A^{:}*K^{:}*R^{:}'.format(*dims)
         dims = dims.replace(' ','')
         
         if not self.regex.match(dims):
             raise SyntaxError('Invalid Dims {:}'.format(dims))
+        
+        # check temperature units
+        value, dims = temperature_in(value, dims)
         
         n = eval(dims.replace('^','**'),self.c_n) or 1        
         l = buckingham(dims,self.c_l)
@@ -344,7 +395,7 @@ class Number:
         >>> print(a+b)
         5.00 ± 2.24
         """
-        if not isinstance(other,Number):
+        if not isinstance(other, Number):
             other=Number(other,0,self.dims)
         elif self.dims != other.dims:
             raise RuntimeError("Incompatible Dimensions")
@@ -512,12 +563,17 @@ class Number:
         return Number(c, dc, dims)
     #
     def convert(self,dims):
+        """
+        """
+        # check temperature units
+        self.value, dims = temperature_out(self.value, dims)
         other = Number(1.0, 0, dims)
+        
         if self.dims != other.dims:
             raise RuntimeError("Incompatible Dimensions")
         return self/other
     #
-    def as_string(self, decimals = 2):
+    def as_string(self, decimals:int = 2):
         value, error, dims = self.value, self.error, self.dims
         if error:
             n = int_safe(abs(value))
@@ -539,7 +595,7 @@ class Number:
             a = "{:{i}f} ± {:{i}f}".format(value,error,i='.'+i)
         return a
     #
-    def as_latex(self,decimals = 2):
+    def as_latex(self,decimals:int = 2):
         value,error,dims = self.value,self.error,self.dims
         if error:
             n = int_safe(abs(value))
@@ -648,24 +704,24 @@ def sin(x):
     if not isinstance(x,Number):
         return math.sin(x)
     if not x.is_pure():
-        #raise RuntimeError("Incompatible Dimensions")
-        raise Exception("Incompatible Dimensions")
+        raise RuntimeError("Incompatible Dimensions")
+        #raise Exception("Incompatible Dimensions")
     return Number(sin(x.value),abs(cos(x.value))*x.error,x.dims)
 #
 def cos(x):
     if not isinstance(x,Number):
         return math.cos(x)
     if not x.is_pure():
-        #raise RuntimeError("Incompatible Dimensions")
-        raise Exception("Incompatible Dimensions")
+        raise RuntimeError("Incompatible Dimensions")
+        #raise Exception("Incompatible Dimensions")
     return Number(cos(x.value),abs(sin(x.value))*x.error,x.dims)
 #
 def exp(x):
     if not isinstance(x,Number):
         return math.exp(x)
     if not x.is_pure():
-        #raise RuntimeError("Incompatible Dimensions")
-        raise Exception("Incompatible Dimensions")
+        raise RuntimeError("Incompatible Dimensions")
+        #raise Exception("Incompatible Dimensions")
     c = exp(x.value)
     return Number(c,abs(c)*x.error,x.dims)
 #
@@ -673,8 +729,8 @@ def log(x):
     if not isinstance(x,Number):
         return math.log(x)
     if not x.is_pure():
-        #raise RuntimeError("Incompatible Dimensions")
-        raise Exception("Incompatible Dimensions")
+        raise RuntimeError("Incompatible Dimensions")
+        #raise Exception("Incompatible Dimensions")
     c = log(x.value)
     return Number(c,abs(x.error/x.value),x.dims)
 #
@@ -717,8 +773,13 @@ if __name__ == '__main__':
     print(Fy.convert("pound/second^2/inch") / grav)
     #
     #    
-    oC = Number(1, dims = 'kelvin') + 273.15
-    print(oC.convert('kelvin'))
+    oC = Number(1, dims = 'fahrenheit')
+    print(oC.units(), oC.value)
+    print(oC.convert('rankine'))
+    #
+    test = oC/sec
+    print(test.units())
+    print(test.convert('celsius/hour'))
     #
     doctest.testmod()
     #

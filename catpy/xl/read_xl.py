@@ -5,7 +5,7 @@
 import os
 
 # package imports
-import xlwings as xw
+#import xlwings as xw
 from catpy.xl.master_sheet import read_master
 from catpy.catenary.rsscat import CatRSS
 from catpy.usfos.geometry import geometry_ufo
