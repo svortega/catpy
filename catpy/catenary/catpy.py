@@ -55,6 +55,14 @@ def check_cable_length(S, L, d):
         #S=float(input("Length of cable [m]: "))      
 #
 #
+class MidArchResults(NamedTuple):
+    """
+    """
+    buoy:Tuple
+    catenary_upper:Tuple
+    catenary_lower:Tuple
+    catenary:List
+    type:str="midwater_arch"
 #
 #
 def pyCatenary(L, d, za, MSL, S, w, workbook_name):
@@ -183,6 +191,7 @@ def irvine_method(L, d, S, w, EA, global_coord,
     S : Length of cable [m] - must be greater than distance between supports
     w : Unit weight of cable [kg/m]
     Axial stiffness EA : [N]
+    global_coord : 
     """
     #
     check_cable_length(S, L, d)
@@ -255,6 +264,7 @@ def riser_touchdown(L, d, S, w, EA, Cb, global_coord,
     S : Length of cable [m] - must be greater than distance between supports
     w : Unit weight of cable [kg/m]
     EA : [N]
+    Cb : Soil Friction
     """
     #
     check_cable_length(S, L, d)

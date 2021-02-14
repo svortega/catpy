@@ -76,7 +76,7 @@ def get_nodes_clone(coord, node_number, nodes,
                               z= coord.z[x] - water_depth)
     return number
 #
-def geometry_ufo(riser, water_depth):
+def geometry_ufo(riser, water_depth, node_step:int = 50000):
     """
     """
     #
@@ -85,35 +85,13 @@ def geometry_ufo(riser, water_depth):
     nodes = {}
     if riser.type == 'arch':
         # Lower catenary
-        node_step = 50000
         coord = riser.catenary_lower.coordinates
         Lb = riser.catenary_lower.Lb
         s = riser.catenary_lower.s
         items = len(coord.x)
         node_no = 0
         node_number = 0
-        # lower_cat
-        #for x in range(items):
-        #    node_number = node_no + x + 1
-        #    nodes[node_number] = Nodes(x= coord.x[x], 
-        #                               y= coord.y[x], 
-        #                               z= coord.z[x] - water_depth)
-        #    # friction springs
-        #    if s[x] <= Lb:
-        #        x_step = node_step + node_number
-        #        nodes[x_step] = Nodes(x= coord.x[x], 
-        #                              y= coord.y[x], 
-        #                              z= coord.z[x] - water_depth)
-        ##
-        ## arch_lower.circle
-        #coord = riser.arch_lower.circle
-        #node_number = get_nodes_clone(coord, node_number, nodes,
-        #                              water_depth, node_step)        
-        ## arch_lower.slot
-        #coord = riser.arch_lower.slot
-        #node_number = get_nodes_clone(coord, node_number, nodes,
-        #                              water_depth, node_step)
-        ##
+        #
         # arch_upper.slot
         coord = riser.arch_upper.slot
         node_number = get_nodes_clone(coord, node_number, nodes,
@@ -135,12 +113,13 @@ def geometry_ufo(riser, water_depth):
         #
         #print('-->')
     else:
-        items = len(riser.catenary[0])
+        coord = riser.catenary
+        items = len(coord.x)
         for x in range(items):
-            nodes[x+1] = Nodes(x=coord.catenary.x[x], 
-                               y=coord.catenary.y[x], 
-                               z=coord.catenary.z[x])
-        
+            nodes[x+1] = Nodes(x=coord.x[x], 
+                               y=coord.y[x], 
+                               z=coord.z[x])
+        node_number = items
     #
     elements = {}
     items = len(riser.catenary[0]) - 1

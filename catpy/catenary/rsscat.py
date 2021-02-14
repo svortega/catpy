@@ -104,7 +104,7 @@ def CatRSS(master):
                                        catenary_upper= upper_cat,
                                        arch_lower= arch_lower,
                                        catenary_lower= lower_cat,
-                                       catenary=Coordinates(x_coord, y_coord, z_coord))            
+                                       catenary=Coordinates(x_coord, y_coord, z_coord))
         else:
             raise NotImplemented("Riser type {:} not yet implemented".format(riser_type))
         #

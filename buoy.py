@@ -17,7 +17,9 @@ hose_lenght = 40*units.feet
 hose_diam = 20*units.inch
 op_weight = 890 * units.kg/units.m**3
 unit_weight = op_weight * math.pi * (hose_diam/2)**2
-test.riser(name="20in_hose", d=hose_diam, 
+test.riser(name="20in_hose", d=hose_diam,
+           k_axial = 800 * units.MN,
+           k_bending = 500 * units.kN/units.m**2,
            unit_weight=unit_weight,
            upper=hose_lenght * 5, 
            lower=hose_lenght * 3)
@@ -40,6 +42,7 @@ L1 = 10 * units.m ## guess
 test.system(MSL= LAT, H_buoy=Hbuoy,
             L_upper=Lt-L1, L_lower=L1)
 #
+test.print_model()
 #
 print('-->')
 
