@@ -249,7 +249,7 @@ def irvine_method(L, d, S, w, EA, global_coord,
     x = [ _x + global_coord.x for _x in x]
     y = [ global_coord.y for _x in x]
     z = [ _z + global_coord.z for _z in z]
-    coord = Coordinates(x, y, z)    
+    coord = Coordinates(x, y, z)
     #
     Lb = 0
     return CatenaryResults(V, H, s, coord, Te, Lb, riser_type="suspended")

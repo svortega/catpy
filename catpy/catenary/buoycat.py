@@ -91,7 +91,7 @@ class CatBuoy:
     def get_catenary(self, riser):
         """ """
         #_global = Coordinates(x=delta_u[0], y= 0, z=delta_u[1])
-        _global = Coordinates(x= 0, y= 0, z= 0)
+        _global = Coordinates(x= self._buoy.r, y= 0, z= self.h_lower)
         _steps = math.ceil(0.50* riser.upper / riser.diametre)
         upper_cat = irvine_method(L=self.L_upper, 
                                   d=self.h_upper, 
@@ -102,24 +102,33 @@ class CatBuoy:
                                   steps=_steps)
         #
         #
-        _global = Coordinates(x= -self.L_lower, y= 0, z= 0)
+        _global = Coordinates(x= -self.L_lower-self._buoy.r, y= 0, z= 0)
         #L_lower = master['L_lower'] - abs(delta_l[0])
         #S_lower = _riser.length_lower - arch_lower.arc_length
         #d_lower = abs(delta_l[1])
         _steps = math.ceil(0.50 * riser.lower / riser.diametre)
-        lower_cat = riser_touchdown(L=self.L_lower, 
-                                    d=self.h_lower, 
-                                    S=riser.lower, 
-                                    w=riser.unit_weight, 
-                                    EA = riser.k_axial,
-                                    Cb=self.Cb,
-                                    global_coord=_global,
-                                    riser_diametre=riser.diametre)
+        #lower_cat = riser_touchdown(L=self.L_lower, 
+        #                            d=self.h_lower, 
+        #                            S=riser.lower, 
+        #                            w=riser.unit_weight, 
+        #                            EA = riser.k_axial,
+        #                            Cb=self.Cb,
+        #                            global_coord=_global,
+        #                            riser_diametre=riser.diametre)
         #
-        #print('--')
-        x_coord = lower_cat.coordinates.x + upper_cat.coordinates.x #buoy_x + 
-        z_coord = lower_cat.coordinates.z + upper_cat.coordinates.z #buoy_z + 
-        y_coord = lower_cat.coordinates.y + upper_cat.coordinates.y #buoy_y +        
+        lower_cat = irvine_method(L=self.L_lower, 
+                                  d=self.h_lower, 
+                                  S=riser.lower, 
+                                  w=riser.unit_weight, 
+                                  EA = riser.k_axial,
+                                  global_coord=_global,
+                                  steps=_steps)
+        #
+        buoy_coord = [[0],[0],[self.h_lower]]
+        #
+        x_coord = lower_cat.coordinates.x + buoy_coord[0] + upper_cat.coordinates.x
+        y_coord = lower_cat.coordinates.y + buoy_coord[1] + upper_cat.coordinates.y
+        z_coord = lower_cat.coordinates.z + buoy_coord[2] + upper_cat.coordinates.z
         #plot_chart(x_coord, z_coord)
         return MidArchResults(buoy= [],
                               catenary_upper= upper_cat,
